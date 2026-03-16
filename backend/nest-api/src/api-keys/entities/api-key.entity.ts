@@ -11,20 +11,20 @@ export class ApiKey {
   @Column()
   name: string;
 
-  @Column()
-  keyPrefix: string;
+  @Column({ unique: true })
+  key: string;
 
-  @Column()
-  hashedKey: string;
-
-  @Column('simple-array')
+  @Column('simple-array', { nullable: true })
   permissions: string[];
 
   @Column({ default: true })
-  active: boolean;
+  isActive: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   lastUsedAt: Date;
+
+  @Column({ nullable: true })
+  expiresAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;
