@@ -1,11 +1,18 @@
 # ClawPilot 🦞
 
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
+  <img src="https://img.shields.io/badge/Angular-18+-DD0031.svg" alt="Angular">
+  <img src="https://img.shields.io/badge/NestJS-10+-E0234E.svg" alt="NestJS">
+</p>
+
 AI Agent Management Platform - Install, run, and manage OpenClaw AI agents through a beautiful web dashboard.
 
 ## Problem Statement
 
 - OpenClaw setup is difficult
-- Model routing configuration is confusing
+- Model routing configuration is confusing  
 - Developers want an easy dashboard
 - Monitoring and logs are hard to track
 - Agent templates are missing
@@ -22,6 +29,8 @@ ClawPilot solves all these problems by providing a unified platform to manage AI
 - 📊 **Monitoring** - Track runs, tokens, and agent status
 - 🔒 **Authentication** - JWT-based auth with secure sessions
 - 💳 **Billing** - Stripe integration with Free/Pro/Team plans
+- 👥 **Teams** - Collaborate with team members
+- 🔌 **Integrations** - GitHub, Slack, Discord, Notion, Linear, Jira, GitLab
 
 ## Architecture
 
@@ -66,7 +75,7 @@ ClawPilot solves all these problems by providing a unified platform to manage AI
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/clawpilot.git
+git clone https://github.com/Namoneo/clawpilot.git
 cd clawpilot
 ```
 
