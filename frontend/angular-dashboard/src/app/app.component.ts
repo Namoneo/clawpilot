@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -7,11 +7,18 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="min-h-screen flex">
+    <div class="min-h-screen flex" [class.light]="isLightMode()">
       <!-- Sidebar -->
-      <aside class="w-64 bg-gray-800 border-r border-gray-700">
-        <div class="p-6">
+      <aside class="w-64 sidebar border-r">
+        <div class="p-6 flex justify-between items-center">
           <h1 class="text-2xl font-bold text-blue-500">ClawPilot</h1>
+          <button 
+            (click)="toggleMode()" 
+            class="text-xl"
+            [title]="isLightMode() ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
+          >
+            {{ isLightMode() ? '🌙' : '☀️' }}
+          </button>
         </div>
         <nav class="mt-6">
           <a routerLink="/dashboard" routerLinkActive="bg-gray-700" class="block px-6 py-3 hover:bg-gray-700 transition">
@@ -39,4 +46,24 @@ import { CommonModule } from '@angular/common';
     </div>
   `,
 })
-export class AppComponent {}
+export class AppComponent {
+  isLightMode = signal(false);
+
+  toggleMode() {
+    this.isLightMode.update(v => !v);
+    if (this.isLightMode()) {
+      document.body.classList.add('light');
+    } else {
+      document.body.classList.remove('light');
+    }
+    localStorage.setItem('theme', this.isLightMode() ? 'light' : 'dark');
+  }
+
+  ngOnInit() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      this.isLightMode.set(true);
+      document.body.classList.add('light');
+    }
+  }
+}
