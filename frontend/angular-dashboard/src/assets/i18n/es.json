@@ -1,0 +1,64 @@
+{
+  "APP_NAME": "ClawPilot",
+  "NAV": {
+    "DASHBOARD": "Panel",
+    "AGENTS": "Agentes",
+    "TEMPLATES": "Plantillas",
+    "LOGS": "Registros",
+    "SETTINGS": "Configuración"
+  },
+  "DASHBOARD": {
+    "TITLE": "Panel",
+    "ACTIVE_AGENTS": "Agentes Activos",
+    "TOTAL_AGENTS": "Agentes Totales",
+    "TOKENS_USED": "Tokens Usados",
+    "RUNS_TODAY": "Ejecuciones Hoy",
+    "RECENT_RUNS": "Ejecuciones Recientes",
+    "NO_ACTIVITY": "Sin actividad reciente. Inicia un agente para ver ejecuciones."
+  },
+  "AGENTS": {
+    "TITLE": "Agentes",
+    "NEW_AGENT": "Nuevo Agente",
+    "NAME": "Nombre",
+    "TEMPLATE": "Plantilla",
+    "STATUS": "Estado",
+    "CREATED": "Creado",
+    "ACTIONS": "Acciones",
+    "START": "Iniciar",
+    "STOP": "Detener",
+    "RUNNING": "ejecutando",
+    "STOPPED": "detenido",
+    "NO_AGENTS": "Sin agentes. Crea uno para comenzar.",
+    "CREATE_AGENT": "Crear Nuevo Agente",
+    "AGENT_NAME": "Nombre del agente",
+    "SELECT_TEMPLATE": "Seleccionar plantilla..."
+  },
+  "TEMPLATES": {
+    "TITLE": "Plantillas de Agentes",
+    "USE_TEMPLATE": "Usar Plantilla"
+  },
+  "SETTINGS": {
+    "TITLE": "Configuración",
+    "PROFILE": "Perfil",
+    "NAME": "Nombre",
+    "EMAIL": "Correo",
+    "UPDATE_PROFILE": "Actualizar Perfil",
+    "API_KEYS": "Claves API",
+    "OPENROUTER_KEY": "Clave API de OpenRouter",
+    "OPENAI_KEY": "Clave API de OpenAI",
+    "SAVE_KEYS": "Guardar Claves",
+    "BILLING": "Facturación",
+    "PLAN": "Plan",
+    "UPGRADE_PLAN": "Mejorar Plan"
+  },
+  "COMMON": {
+    "CREATE": "Crear",
+    "CANCEL": "Cancelar",
+    "SAVE": "Guardar",
+    "DELETE": "Eliminar",
+    "EDIT": "Editar",
+    "LOADING": "Cargando...",
+    "ERROR": "Error",
+    "SUCCESS": "Éxito"
+  }
+}

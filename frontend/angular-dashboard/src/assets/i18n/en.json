@@ -1,0 +1,64 @@
+{
+  "APP_NAME": "ClawPilot",
+  "NAV": {
+    "DASHBOARD": "Dashboard",
+    "AGENTS": "Agents",
+    "TEMPLATES": "Templates",
+    "LOGS": "Logs",
+    "SETTINGS": "Settings"
+  },
+  "DASHBOARD": {
+    "TITLE": "Dashboard",
+    "ACTIVE_AGENTS": "Active Agents",
+    "TOTAL_AGENTS": "Total Agents",
+    "TOKENS_USED": "Tokens Used",
+    "RUNS_TODAY": "Runs Today",
+    "RECENT_RUNS": "Recent Runs",
+    "NO_ACTIVITY": "No recent activity. Start an agent to see runs here."
+  },
+  "AGENTS": {
+    "TITLE": "Agents",
+    "NEW_AGENT": "New Agent",
+    "NAME": "Name",
+    "TEMPLATE": "Template",
+    "STATUS": "Status",
+    "CREATED": "Created",
+    "ACTIONS": "Actions",
+    "START": "Start",
+    "STOP": "Stop",
+    "RUNNING": "running",
+    "STOPPED": "stopped",
+    "NO_AGENTS": "No agents yet. Create one to get started.",
+    "CREATE_AGENT": "Create New Agent",
+    "AGENT_NAME": "Agent name",
+    "SELECT_TEMPLATE": "Select template..."
+  },
+  "TEMPLATES": {
+    "TITLE": "Agent Templates",
+    "USE_TEMPLATE": "Use Template"
+  },
+  "SETTINGS": {
+    "TITLE": "Settings",
+    "PROFILE": "Profile",
+    "NAME": "Name",
+    "EMAIL": "Email",
+    "UPDATE_PROFILE": "Update Profile",
+    "API_KEYS": "API Keys",
+    "OPENROUTER_KEY": "OpenRouter API Key",
+    "OPENAI_KEY": "OpenAI API Key",
+    "SAVE_KEYS": "Save Keys",
+    "BILLING": "Billing",
+    "PLAN": "Plan",
+    "UPGRADE_PLAN": "Upgrade Plan"
+  },
+  "COMMON": {
+    "CREATE": "Create",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "DELETE": "Delete",
+    "EDIT": "Edit",
+    "LOADING": "Loading...",
+    "ERROR": "Error",
+    "SUCCESS": "Success"
+  }
+}
