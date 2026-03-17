@@ -2,17 +2,19 @@ import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 import { FileService } from './file.service';
 import { FileController } from './file.controller';
 import { File } from './entities/file.entity';
+
+const UPLOAD_DIR = process.env.UPLOAD_DIR || join(process.cwd(), 'uploads');
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([File]),
     MulterModule.register({
       storage: diskStorage({
-        destination: './uploads',
+        destination: UPLOAD_DIR,
         filename: (req, file, cb) => {
           const randomName = Array(32).fill(null).map(() => Math.round(Math.random() * 16).toString(16)).join('');
           cb(null, `${randomName}${extname(file.originalname)}`);

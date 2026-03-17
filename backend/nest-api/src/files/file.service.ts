@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File } from './entities/file.entity';
 import { Multer } from 'multer';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class FileService {
@@ -19,7 +21,7 @@ export class FileService {
       path: file.path,
       mimeType: file.mimetype,
       size: file.size,
-      agentId,
+      agentId: agentId || undefined,
       description,
     });
     return this.fileRepository.save(newFile);
@@ -46,10 +48,12 @@ export class FileService {
       throw new NotFoundException('File not found');
     }
     
-    // Delete physical file
-    const fs = require('fs');
-    if (fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
+    // Delete physical file asynchronously
+    try {
+      await fs.unlink(file.path);
+    } catch (error) {
+      // File may already be deleted, continue anyway
+      console.error('Failed to delete file:', error);
     }
     
     await this.fileRepository.remove(file);
