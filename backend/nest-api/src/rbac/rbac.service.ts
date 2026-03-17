@@ -61,8 +61,20 @@ export class RbacService {
   }
 
   async hasPermission(userRole: Role, resource: string, action: string): Promise<boolean> {
+    if (!userRole?.permissions) {
+      return false;
+    }
+
     return userRole.permissions.some(
-      p => p.name === `${resource}:${action}` || p.name === 'admin:*' || p.resource === '*',
+      p => 
+        // Exact match: resource:action
+        p.name === `${resource}:${action}` ||
+        // Admin has all permissions
+        p.name === 'admin:*' ||
+        // Wildcard resource
+        (p.resource === '*' && p.action === '*') ||
+        // Wildcard action for specific resource
+        (p.resource === resource && p.action === '*')
     );
   }
 }
