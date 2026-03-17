@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RbacService } from './rbac.service';
 
@@ -13,8 +13,12 @@ export class RbacController {
   }
 
   @Post('seed')
-  seed(@Request() req) {
-    // Only admins can seed
+  async seed(@Request() req) {
+    // Only admins can seed roles
+    const userRole = req.user?.role;
+    if (userRole !== 'admin') {
+      throw new ForbiddenException('Only admins can seed roles');
+    }
     return this.rbacService.seedRoles();
   }
 }
