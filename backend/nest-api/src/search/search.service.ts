@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, Or } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { Agent } from '../agents/entities/agent.entity';
 import { AgentRun } from '../agents/entities/agent-run.entity';
 import { User } from '../users/entities/user.entity';
@@ -41,8 +41,9 @@ export class SearchService {
       total: 0,
     };
 
+    // Get counts and data separately for accurate pagination
     if (type === 'all' || type === 'agents') {
-      result.agents = await this.agentRepository.find({
+      const [agents, totalAgents] = await this.agentRepository.findAndCount({
         where: [
           { name: ILike(searchPattern) },
           { description: ILike(searchPattern) },
@@ -51,10 +52,12 @@ export class SearchService {
         skip: offset,
         relations: ['user'],
       });
+      result.agents = agents;
+      result.total += totalAgents;
     }
 
     if (type === 'all' || type === 'runs') {
-      result.runs = await this.runRepository.find({
+      const [runs, totalRuns] = await this.runRepository.findAndCount({
         where: [
           { status: ILike(searchPattern) },
           { input: ILike(searchPattern) },
@@ -64,10 +67,12 @@ export class SearchService {
         skip: offset,
         relations: ['agent', 'agent.user'],
       });
+      result.runs = runs;
+      result.total += totalRuns;
     }
 
     if (type === 'all' || type === 'users') {
-      result.users = await this.userRepository.find({
+      const [users, totalUsers] = await this.userRepository.findAndCount({
         where: [
           { email: ILike(searchPattern) },
           { name: ILike(searchPattern) },
@@ -75,25 +80,27 @@ export class SearchService {
         take: limit,
         skip: offset,
       });
+      result.users = users;
+      result.total += totalUsers;
     }
 
-    result.total = result.agents.length + result.runs.length + result.users.length;
     return result;
   }
 
   async searchAgents(query: string, userId?: number): Promise<Agent[]> {
     const searchPattern = `%${query}%`;
-    const where: any = [
+    
+    const whereConditions = [
       { name: ILike(searchPattern) },
       { description: ILike(searchPattern) },
     ];
-    
-    if (userId) {
-      where.push({ userId });
+
+    if (userId !== undefined) {
+      whereConditions.push({ userId });
     }
 
     return this.agentRepository.find({
-      where: where,
+      where: whereConditions,
       take: 20,
       relations: ['user'],
     });
