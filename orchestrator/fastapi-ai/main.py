@@ -10,6 +10,12 @@ import redis.asyncio as redis
 import json
 import os
 
+# Deep Agents Integration - can be enabled with: pip install deepagents
+# from deepagents import create_deep_agent  # Uncomment when deepagents is installed
+# from langchain_openai import ChatOpenAI
+
+DEEP_AGENTS_AVAILABLE = False
+
 app = FastAPI(title="ClawPilot AI Orchestrator", version="1.0.0")
 
 app.add_middleware(
@@ -132,13 +138,56 @@ def create_agent_graph():
     return workflow.compile()
 
 
+# Deep Agents Integration
+try:
+    from deepagents import create_deep_agent, DeepAgent
+    from langchain_openai import ChatOpenAI
+    
+    # Initialize Deep Agent with planning and subagent capabilities
+    llm = ChatOpenAI(model="gpt-4", temperature=0.7)
+    
+    # Create a deep agent with built-in planning and subagent spawning
+    def create_advanced_agent(tools: List[Any] = None):
+        """Create an advanced agent using deep-agents framework"""
+        
+        # Define system prompt for the agent
+        system_prompt = """You are an expert AI coding assistant.
+        
+        You have access to:
+        - Planning tools to break down complex tasks
+        - Subagent spawning for parallel task execution
+        - Long-term memory for context retention
+        
+        Always provide well-structured, production-ready code."""
+        
+        # Create the deep agent with planning capabilities
+        agent = create_deep_agent(
+            llm=llm,
+            tools=tools or [],
+            system_prompt=system_prompt,
+            enable_planning=True,      # Enable task decomposition
+            enable_subagents=True,     # Enable spawning subagents
+            enable_memory=True         # Enable persistent memory
+        )
+        
+        return agent
+    
+    DEEP_AGENTS_AVAILABLE = True
+    print("✓ Deep Agents integration enabled")
+    
+except ImportError as e:
+    DEEP_AGENTS_AVAILABLE = False
+    print(f"⚠ Deep Agents not available: {e}")
+    create_advanced_agent = None
+
+
 # Initialize graph
 agent_graph = create_agent_graph()
 
 
 @app.get("/")
 async def root():
-    return {"message": "ClawPilot AI Orchestrator", "version": "1.0.0"}
+    return {"message": "ClawPilot AI Orchestrator", "version": "1.0.0", "deep_agents": DEEP_AGENTS_AVAILABLE}
 
 
 @app.post("/execute", response_model=TaskResponse)
@@ -172,6 +221,41 @@ async def execute_task(request: TaskRequest, background_tasks: BackgroundTasks):
     )
 
 
+@app.post("/execute/advanced")
+async def execute_advanced_task(request: TaskRequest):
+    """Execute a task using Deep Agents with planning and subagent support"""
+    
+    if not DEEP_AGENTS_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Deep Agents not available. Install with: pip install deepagents"
+        )
+    
+    try:
+        # Create advanced agent
+        agent = create_advanced_agent()
+        
+        # Execute task with deep agent (handles planning automatically)
+        result = agent.invoke({
+            "messages": [{
+                "role": "user",
+                "content": request.task
+            }]
+        })
+        
+        # Extract response
+        response = result.get("messages", [])[-1].content if result.get("messages") else str(result)
+        
+        return {
+            "status": "success",
+            "result": response,
+            "features_used": ["planning", "subagents", "memory"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/workflow/{workflow_id}")
 async def get_workflow_status(workflow_id: int):
     """Get workflow status"""
@@ -199,7 +283,7 @@ async def get_workflow_status(workflow_id: int):
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "healthy"}
+    return {"status": "healthy", "deep_agents": DEEP_AGENTS_AVAILABLE}
 
 
 if __name__ == "__main__":
