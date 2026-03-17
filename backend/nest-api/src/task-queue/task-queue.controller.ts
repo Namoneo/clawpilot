@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request, BadRequestException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TaskQueueService } from './task-queue.service';
 
@@ -17,6 +17,9 @@ export class TaskQueueController {
     @Request() req,
     @Body() body: { to: string; subject: string; template: string },
   ) {
+    if (!req.user?.id) {
+      throw new BadRequestException('User not authenticated');
+    }
     return this.taskQueueService.sendEmail(
       body.to,
       body.subject,
@@ -28,8 +31,11 @@ export class TaskQueueController {
   @Post('webhook')
   triggerWebhook(
     @Request() req,
-    @Body() body: { url: string; event: string; payload: any },
+    @Body() body: { url: string; event: string; payload: unknown },
   ) {
+    if (!req.user?.id) {
+      throw new BadRequestException('User not authenticated');
+    }
     return this.taskQueueService.triggerWebhook(
       body.url,
       body.event,
