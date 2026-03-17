@@ -140,7 +140,7 @@ def create_agent_graph():
 
 # Deep Agents Integration
 try:
-    from deepagents import create_deep_agent, DeepAgent
+    from deepagents import create_deep_agent
     from langchain_openai import ChatOpenAI
     
     # Initialize Deep Agent with planning and subagent capabilities
@@ -152,13 +152,13 @@ try:
         
         # Define system prompt for the agent
         system_prompt = """You are an expert AI coding assistant.
-        
-        You have access to:
-        - Planning tools to break down complex tasks
-        - Subagent spawning for parallel task execution
-        - Long-term memory for context retention
-        
-        Always provide well-structured, production-ready code."""
+
+You have access to:
+- Planning tools to break down complex tasks
+- Subagent spawning for parallel task execution
+- Long-term memory for context retention
+
+Always provide well-structured, production-ready code."""
         
         # Create the deep agent with planning capabilities
         agent = create_deep_agent(
