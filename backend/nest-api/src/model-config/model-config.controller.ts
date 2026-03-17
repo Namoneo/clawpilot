@@ -16,14 +16,14 @@ export class ModelConfigController {
   getConfigs(@Request() req, @Query('agentId') agentId?: string) {
     return this.configService.getUserConfigs(
       req.user.id,
-      agentId ? parseInt(agentId, 10) : undefined,
+      agentId !== undefined ? parseInt(agentId, 10) : undefined,
     );
   }
 
   @Post('config')
   setConfig(
     @Request() req,
-    @Body() body: { role: string; provider: string; model: string; agentId?: number; settings?: any },
+    @Body() body: { role: string; provider: string; model: string; agentId?: number; settings?: Record<string, unknown> },
   ) {
     return this.configService.setConfig(
       req.user.id,
@@ -44,7 +44,7 @@ export class ModelConfigController {
     return this.configService.getModelForRole(
       req.user.id,
       role,
-      agentId ? parseInt(agentId, 10) : undefined,
+      agentId !== undefined ? parseInt(agentId, 10) : undefined,
     );
   }
 

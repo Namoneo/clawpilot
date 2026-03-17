@@ -1,5 +1,27 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
+export enum ModelRole {
+  PLANNING = 'planning',
+  CODING = 'coding',
+  CHAT = 'chat',
+  RAG = 'rag',
+  REVIEW = 'review',
+}
+
+export enum ModelProvider {
+  OPENROUTER = 'openrouter',
+  OLLAMA = 'ollama',
+  MOONSHOT = 'moonshot',
+}
+
+export interface ModelSettings {
+  temperature?: number;
+  max_tokens?: number;
+  top_p?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
+}
+
 @Entity('model_configs')
 export class ModelConfig {
   @PrimaryGeneratedColumn()
@@ -11,17 +33,17 @@ export class ModelConfig {
   @Column({ nullable: true })
   agentId: number;
 
-  @Column({ default: 'planning' })
-  role: string; // planning, coding, chat, rag, review
+  @Column({ default: ModelRole.PLANNING })
+  role: ModelRole;
 
   @Column()
-  provider: string; // openrouter, ollama, moonshot
+  provider: ModelProvider;
 
   @Column()
   model: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  settings: Record<string, any>; // temperature, max_tokens, etc.
+  settings: ModelSettings;
 
   @Column({ default: true })
   isActive: boolean;
