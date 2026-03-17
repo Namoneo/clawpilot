@@ -49,16 +49,26 @@ export class TaskQueueService {
 
   // Queue health
   async getQueueStats() {
-    const [agent, email, webhook] = await Promise.all([
-      this.agentTasksQueue.getJobCounts(),
-      this.emailQueue.getJobCounts(),
-      this.webhookQueue.getJobCounts(),
-    ]);
+    try {
+      const [agent, email, webhook] = await Promise.all([
+        this.agentTasksQueue.getJobCounts(),
+        this.emailQueue.getJobCounts(),
+        this.webhookQueue.getJobCounts(),
+      ]);
 
-    return {
-      agentTasks: agent,
-      emailQueue: email,
-      webhookQueue: webhook,
-    };
+      return {
+        agentTasks: agent,
+        emailQueue: email,
+        webhookQueue: webhook,
+      };
+    } catch (error) {
+      console.error('Failed to get queue stats:', error);
+      return {
+        agentTasks: { active: 0, waiting: 0, completed: 0, failed: 0 },
+        emailQueue: { active: 0, waiting: 0, completed: 0, failed: 0 },
+        webhookQueue: { active: 0, waiting: 0, completed: 0, failed: 0 },
+        error: 'Failed to retrieve queue stats',
+      };
+    }
   }
 }
