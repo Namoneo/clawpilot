@@ -8,21 +8,34 @@ export class ApiKeyController {
   constructor(private apiKeyService: ApiKeyService) {}
 
   @Post()
-  create(
+  async create(
     @Request() req,
     @Body() body: { name: string; permissions?: string[]; expiresAt?: string },
   ) {
-    return this.apiKeyService.create(
+    const result = await this.apiKeyService.create(
       req.user.id,
       body.name,
       body.permissions,
       body.expiresAt ? new Date(body.expiresAt) : undefined,
     );
+    
+    // Return API key only once
+    return {
+      id: result.apiKey.id,
+      name: result.apiKey.name,
+      key: result.rawKey, // Only returned on creation
+      permissions: result.apiKey.permissions,
+      expiresAt: result.apiKey.expiresAt,
+      createdAt: result.apiKey.createdAt,
+    };
   }
 
   @Get()
   findAll(@Request() req) {
-    return this.apiKeyService.findByUser(req.user.id);
+    // Don't return the actual key
+    return this.apiKeyService.findByUser(req.user.id).then(keys => 
+      keys.map(k => ({ ...k, key: '********' }))
+    );
   }
 
   @Delete(':id')

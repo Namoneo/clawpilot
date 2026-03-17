@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiKey } from './entities/api-key.entity';
-import { randomBytes } from 'crypto';
+import { randomBytes, createHash } from 'crypto';
 
 @Injectable()
 export class ApiKeyService {
@@ -11,18 +11,24 @@ export class ApiKeyService {
     private apiKeyRepository: Repository<ApiKey>,
   ) {}
 
-  async create(userId: number, name: string, permissions?: string[], expiresAt?: Date): Promise<ApiKey> {
-    const key = `cp_${randomBytes(32).toString('hex')}`;
+  private hashKey(key: string): string {
+    return createHash('sha256').update(key).digest('hex');
+  }
+
+  async create(userId: number, name: string, permissions?: string[], expiresAt?: Date): Promise<{ apiKey: ApiKey; rawKey: string }> {
+    const rawKey = `cp_${randomBytes(32).toString('hex')}`;
+    const hashedKey = this.hashKey(rawKey);
     
     const apiKey = this.apiKeyRepository.create({
       userId,
       name,
-      key,
+      key: hashedKey,
       permissions: permissions || ['read'],
       expiresAt,
     });
     
-    return this.apiKeyRepository.save(apiKey);
+    const saved = await this.apiKeyRepository.save(apiKey);
+    return { apiKey: saved, rawKey };
   }
 
   async findByUser(userId: number): Promise<ApiKey[]> {
@@ -33,8 +39,9 @@ export class ApiKeyService {
   }
 
   async validate(key: string): Promise<ApiKey | null> {
+    const hashedKey = this.hashKey(key);
     const apiKey = await this.apiKeyRepository.findOne({
-      where: { key, isActive: true },
+      where: { key: hashedKey, isActive: true },
     });
     
     if (!apiKey) {
