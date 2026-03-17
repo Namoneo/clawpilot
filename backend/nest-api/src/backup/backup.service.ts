@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Agent } from '../agents/entities/agent.entity';
 import { AgentRun } from '../agents/entities/agent-run.entity';
-import { createWriteStream, existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 export interface BackupMetadata {
@@ -35,11 +35,15 @@ export class BackupService {
       mkdirSync(backupDir, { recursive: true });
     }
 
-    // Export data as JSON
+    // Export data as JSON (without relations to avoid circular refs)
+    const users = await this.userRepository.find();
+    const agents = await this.agentRepository.find();
+    const runs = await this.runRepository.find();
+
     const data = {
-      users: await this.userRepository.find(),
-      agents: await this.agentRepository.find({ relations: ['user'] }),
-      runs: await this.runRepository.find({ relations: ['agent'] }),
+      users: users.map(u => ({ ...u, password: undefined })),
+      agents: agents.map(a => ({ ...a, userId: a.user?.id })),
+      runs: runs.map(r => ({ ...r, agentId: r.agent?.id })),
       exportedAt: new Date().toISOString(),
       version: '1.0',
     };
@@ -72,27 +76,44 @@ export class BackupService {
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     let restored = 0;
 
+    // Map old IDs to new IDs
+    const userIdMap = new Map<number, number>();
+    const agentIdMap = new Map<number, number>();
+
     // Restore users (skip existing)
     for (const user of data.users || []) {
       const existing = await this.userRepository.findOne({ where: { email: user.email } });
       if (!existing) {
-        await this.userRepository.save(user);
+        const { id, ...userData } = user;
+        const saved = await this.userRepository.save(userData);
+        userIdMap.set(id, saved.id);
+        restored++;
+      } else {
+        userIdMap.set(id, existing.id);
+      }
+    }
+
+    // Restore agents with correct user relationship
+    for (const agent of data.agents || []) {
+      const { id, userId, ...agentData } = agent;
+      const newUserId = userIdMap.get(userId);
+      
+      if (newUserId) {
+        const saved = await this.agentRepository.save({ ...agentData, userId: newUserId });
+        agentIdMap.set(id, saved.id);
         restored++;
       }
     }
 
-    // Restore agents
-    for (const agent of data.agents || []) {
-      const { user, ...agentData } = agent;
-      await this.agentRepository.save(agentData);
-      restored++;
-    }
-
-    // Restore runs
+    // Restore runs with correct agent relationship
     for (const run of data.runs || []) {
-      const { agent, ...runData } = run;
-      await this.runRepository.save(runData);
-      restored++;
+      const { id, agentId, ...runData } = run;
+      const newAgentId = agentIdMap.get(agentId);
+      
+      if (newAgentId) {
+        await this.runRepository.save({ ...runData, agentId: newAgentId });
+        restored++;
+      }
     }
 
     return { restored };
