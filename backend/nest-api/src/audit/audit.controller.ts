@@ -1,6 +1,19 @@
-import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Request, BadRequestException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuditService } from './audit.service';
+
+function parseIntSafe(value: string | undefined, defaultValue: number): number {
+  if (!value) return defaultValue;
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? defaultValue : parsed;
+}
+
+function parseDateSafe(value: string | undefined): Date {
+  if (!value) throw new BadRequestException('Date parameter required');
+  const date = new Date(value);
+  if (isNaN(date.getTime())) throw new BadRequestException('Invalid date format');
+  return date;
+}
 
 @Controller('audit')
 @UseGuards(AuthGuard('jwt'))
@@ -12,7 +25,7 @@ export class AuditController {
     @Request() req,
     @Query('limit') limit?: string,
   ) {
-    return this.auditService.findByUser(req.user.id, limit ? parseInt(limit, 10) : 50);
+    return this.auditService.findByUser(req.user.id, parseIntSafe(limit, 50));
   }
 
   @Get('entity')
@@ -20,7 +33,10 @@ export class AuditController {
     @Query('type') entityType: string,
     @Query('id') entityId: string,
   ) {
-    return this.auditService.findByEntity(entityType, parseInt(entityId, 10));
+    const parsedId = parseIntSafe(entityId, 0);
+    if (!entityType) throw new BadRequestException('entityType is required');
+    if (parsedId <= 0) throw new BadRequestException('Invalid entityId');
+    return this.auditService.findByEntity(entityType, parsedId);
   }
 
   @Get('range')
@@ -28,6 +44,6 @@ export class AuditController {
     @Query('start') start: string,
     @Query('end') end: string,
   ) {
-    return this.auditService.findByDateRange(new Date(start), new Date(end));
+    return this.auditService.findByDateRange(parseDateSafe(start), parseDateSafe(end));
   }
 }
