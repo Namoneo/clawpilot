@@ -1,7 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SlackDiscordIntegration, IntegrationType } from './entities/slack-discord-integration.entity';
+
+const SLACK_WEBHOOK_PATTERN = /^https:\/\/hooks\.slack\.com\//;
+const DISCORD_WEBHOOK_PATTERN = /^https:\/\/discord\.com\/api\/webhooks\//;
+
+const BLOCKED_HOSTS = [
+  'localhost',
+  '127.0.0.1',
+  '0.0.0.0',
+  '::1',
+  'metadata.google.internal',
+  'metadata.google',
+];
 
 @Injectable()
 export class SlackDiscordService {
@@ -10,6 +22,46 @@ export class SlackDiscordService {
     private integrationRepository: Repository<SlackDiscordIntegration>,
   ) {}
 
+  private validateWebhookUrl(url: string, type: IntegrationType): void {
+    let isValid = false;
+    
+    if (type === IntegrationType.SLACK) {
+      isValid = SLACK_WEBHOOK_PATTERN.test(url);
+    } else {
+      isValid = DISCORD_WEBHOOK_PATTERN.test(url);
+    }
+
+    if (!isValid) {
+      throw new BadRequestException(`Invalid ${type} webhook URL`);
+    }
+
+    // Block internal/private addresses
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+      
+      if (BLOCKED_HOSTS.includes(hostname)) {
+        throw new BadRequestException('Internal addresses not allowed');
+      }
+
+      // Block private IP ranges
+      if (hostname.startsWith('10.') || 
+          hostname.startsWith('192.168.') || 
+          hostname.startsWith('172.16.') ||
+          hostname.startsWith('172.17.') ||
+          hostname.startsWith('172.18.') ||
+          hostname.startsWith('172.19.') ||
+          hostname.startsWith('172.2') ||
+          hostname.startsWith('172.30.') ||
+          hostname.startsWith('172.31.')) {
+        throw new BadRequestException('Private IP addresses not allowed');
+      }
+    } catch (e) {
+      if (e instanceof BadRequestException) throw e;
+      throw new BadRequestException('Invalid URL');
+    }
+  }
+
   async create(
     userId: number,
     type: IntegrationType,
@@ -17,6 +69,9 @@ export class SlackDiscordService {
     events: string[],
     channelName?: string,
   ): Promise<SlackDiscordIntegration> {
+    // Validate webhook URL
+    this.validateWebhookUrl(webhookUrl, type);
+
     const integration = this.integrationRepository.create({
       userId,
       type,
