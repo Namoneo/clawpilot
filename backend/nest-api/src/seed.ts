@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
-import config from './data-source';
+import dataSource from './data-source';
 
-const dataSource = new DataSource(config);
+
 
 async function seed() {
   console.log('🌱 Seeding database...');
