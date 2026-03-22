@@ -9,28 +9,43 @@
 
 AI Agent Management Platform - Install, run, and manage OpenClaw AI agents through a beautiful web dashboard.
 
-## Problem Statement
+## Table of Contents
 
-- OpenClaw setup is difficult
-- Model routing configuration is confusing  
-- Developers want an easy dashboard
-- Monitoring and logs are hard to track
-- Agent templates are missing
-
-## Solution
-
-ClawPilot solves all these problems by providing a unified platform to manage AI agents.
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [API Documentation](#api-documentation)
+- [Deployment](#deployment)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
+### Core
 - 🤖 **Agent Management** - Create, start, stop, and monitor AI agents
-- 📋 **Templates** - Pre-configured agent templates (Developer Assistant, Research Agent, Automation Agent)
+- 📋 **Templates** - Pre-configured agent templates
 - 🎯 **Model Routing** - Configure planning, coding, review, chat, and RAG models
-- 📊 **Monitoring** - Track runs, tokens, and agent status
-- 🔒 **Authentication** - JWT-based auth with secure sessions
-- 💳 **Billing** - Stripe integration with Free/Pro/Team plans
-- 👥 **Teams** - Collaborate with team members
-- 🔌 **Integrations** - GitHub, Slack, Discord, Notion, Linear, Jira, GitLab
+- 📊 **Analytics** - Track runs, tokens, and agent performance
+
+### Security & Auth
+- 🔒 **JWT Authentication** - Secure session management
+- 🔐 **API Keys** - Programmatic access
+- 👥 **Team Management** - Collaborate with team members
+- ✅ **Roles & Permissions** - Granular access control
+
+### Integrations
+- 🔌 **External Integrations** - GitHub, Slack, Discord, Notion, Linear, Jira, GitLab
+- 📄 **Documents (RAG)** - Upload documents for AI context
+- 🌐 **Webhooks** - HTTP callbacks for events
+- 📧 **Email Notifications** - Welcome, alerts, billing
+
+### DevOps
+- 🐳 **Docker** - Containerized deployment
+- 📈 **Metrics** - System and agent metrics
+- 🔔 **Alerts** - System monitoring and alerts
+- 📝 **Audit Logs** - Track all user actions
 
 ## Architecture
 
@@ -71,7 +86,7 @@ ClawPilot solves all these problems by providing a unified platform to manage AI
 - Docker & Docker Compose
 - PostgreSQL (or use Docker)
 
-### Development Setup
+### Installation
 
 1. Clone the repository:
 ```bash
@@ -89,6 +104,7 @@ docker-compose up -d
 ```bash
 cd backend/nest-api
 npm install
+npm run migration:run
 npm run start:dev
 ```
 
@@ -101,12 +117,13 @@ npm start
 
 5. Open http://localhost:4200
 
-## API Endpoints
+## API Documentation
 
 ### Authentication
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login
 - `GET /api/auth/me` - Get current user
+- `GET /api/auth/github` - GitHub OAuth login
 
 ### Agents
 - `POST /api/agents` - Create agent
@@ -117,10 +134,56 @@ npm start
 - `GET /api/agents/:id/logs` - Get agent logs
 - `GET /api/agents/:id/runs` - Get run history
 
-## Agent Templates
+### Billing
+- `GET /api/billing` - Get billing info
+- `GET /api/billing/plans` - Get available plans
+- `POST /api/billing/upgrade` - Upgrade plan
 
-### Developer Assistant
+### Templates
+- `GET /api/templates` - List templates
+- `GET /api/templates/:id` - Get template
+
+### Metrics
+- `GET /api/metrics` - Get system metrics
+- `GET /api/metrics/daily` - Get daily metrics
+- `GET /api/analytics` - Get analytics
+
+Full API docs available at `/api/docs` when running.
+
+## Deployment
+
+### Production
+
+```bash
+# Clone and setup
+git clone https://github.com/Namoneo/clawpilot.git
+cd clawpilot
+
+# Setup environment
+cp infra/production.env.example infra/production.env
+# Edit production.env with your values
+
+# Start production stack
+cd infra/docker-compose
+docker-compose -f docker-compose.yml up -d
+```
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DB_USER` | PostgreSQL user | Yes |
+| `DB_PASSWORD` | PostgreSQL password | Yes |
+| `JWT_SECRET` | JWT signing secret | Yes |
+| `OPENROUTER_API_KEY` | OpenRouter API key | No |
+| `STRIPE_SECRET_KEY` | Stripe secret key | No |
+
+## Configuration
+
+### Agent Templates
+
 ```yaml
+# Developer Assistant
 routing:
   planning: openrouter/anthropic/claude-3.5-sonnet
   coding: ollama/deepseek-coder-v2:latest
@@ -129,48 +192,25 @@ routing:
   rag: ollama/qwen2.5:7b
 ```
 
-### Research Agent
-```yaml
-routing:
-  planning: openrouter/anthropic/claude-3.5-sonnet
-  coding: ollama/qwen2.5:7b
-  review: openrouter/anthropic/claude-3.5-sonnet
-  chat: ollama/llama3.1:8b
-  rag: ollama/qwen2.5:7b
-```
+### Model Providers
 
-### Automation Agent
-```yaml
-routing:
-  planning: openrouter/anthropic/claude-3.5-sonnet
-  coding: ollama/deepseek-coder-v2:latest
-  review: ollama/llama3.1:8b
-  chat: ollama/llama3.1:8b
-  rag: ollama/qwen2.5:7b
-```
-
-## Pricing
-
-| Feature | Free | Pro | Team |
-|---------|------|-----|------|
-| Agents | 1 | 5 | 20 |
-| Templates | 3 | All | All |
-| Monitoring | Basic | Advanced | Advanced |
-| Team Access | ❌ | ❌ | ✅ |
-| Private Templates | ❌ | ❌ | ✅ |
-| Price | $0 | $29/mo | $99/mo |
+Supported providers:
+- **OpenRouter** - Claude, GPT, Llama, and more
+- **OpenAI** - GPT-4, GPT-4o
+- **Anthropic** - Claude
+- **Ollama** - Local models
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT License - see LICENSE for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
