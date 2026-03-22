@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationSetting } from './entities/notification-setting.entity';
@@ -16,12 +16,21 @@ export class NotificationSettingsService {
     // Create defaults if not exist
     if (settings.length === 0) {
       const defaults = [
+        // email type
         { userId, type: 'email', event: 'agent_started', enabled: true },
         { userId, type: 'email', event: 'agent_stopped', enabled: true },
         { userId, type: 'email', event: 'agent_failed', enabled: true },
         { userId, type: 'email', event: 'billing', enabled: true },
+        // push type
         { userId, type: 'push', event: 'agent_started', enabled: false },
         { userId, type: 'push', event: 'agent_stopped', enabled: false },
+        { userId, type: 'push', event: 'agent_failed', enabled: false },
+        { userId, type: 'push', event: 'billing', enabled: false },
+        // webhook type
+        { userId, type: 'webhook', event: 'agent_started', enabled: false },
+        { userId, type: 'webhook', event: 'agent_stopped', enabled: false },
+        { userId, type: 'webhook', event: 'agent_failed', enabled: false },
+        { userId, type: 'webhook', event: 'billing', enabled: false },
       ];
       
       for (const s of defaults) {
